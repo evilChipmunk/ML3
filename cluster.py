@@ -57,8 +57,8 @@ def CreateEMScoreHeader():
 
 
 def SaveScores(header, name, processedScores): 
-    # df = pd.DataFrame(processedScores, columns=header) 
-    # df.to_csv(baseGraphPath + 'scores\\{0} scores.csv'.format(name))
+    df = pd.DataFrame(processedScores, columns=header) 
+    df.to_csv(baseGraphPath + 'scores\\{0} scores.csv'.format(name))
     a = 4
  
 
@@ -303,7 +303,7 @@ def runClusterPackage(k, package, title, classNames):
     yTest = package.yTest
 
     processedScores = []
-    km = KMeans(n_clusters=k, random_state=10)
+    km = KMeans(n_clusters=k)
     cluster_labels = km.fit_predict(xTrain) 
     predictions = km.predict(xTrain)
  
@@ -321,7 +321,7 @@ def runEMPackage(k, package, title, classNames):
     yTest = package.yTest
 
     processedScores = [] 
-    em = GaussianMixture(n_components=k, covariance_type='diag', n_init=1, warm_start=True, random_state=10) 
+    em = GaussianMixture(n_components=k, covariance_type='diag', n_init=1, warm_start=True) 
     em_labels = em.fit_predict(xTrain)  
     predictions = em.predict(xTrain)
 
@@ -364,8 +364,10 @@ def unprocess(package):
  
 
 def run():
-    # adultPackage = unprocess( data.createData('adult'))
-    # heartPackage = unprocess(data.createData('heart') )
+
+    getClusterData('adult', 'PCA')
+    adultPackage = unprocess( data.createData('adult'))
+    heartPackage = unprocess(data.createData('heart') )
  
     adultPackage = data.createData('adult')
     heartPackage = data.createData('heart') 
@@ -378,38 +380,56 @@ def run():
     runAll(heartPackage, heartClasses, topRange, 'Heart', 'None')
 
     
-    # adultPackage.xTrain = dimRedu.getPCAData(adultPackage.xTrain, 'Adult')
-    # heartPackage.xTrain = dimRedu.getPCAData(heartPackage.xTrain, 'Heart')
-    # runAll(adultPackage, adultClasses, topRange, 'Adult', 'PCA')
-    # runAll(heartPackage, heartClasses, topRange, 'Heart', 'PCA') 
+    adultPackage.xTrain = dimRedu.getPCAData(adultPackage.xTrain, 'Adult')
+    heartPackage.xTrain = dimRedu.getPCAData(heartPackage.xTrain, 'Heart')
+    runAll(adultPackage, adultClasses, topRange, 'Adult', 'PCA')
+    runAll(heartPackage, heartClasses, topRange, 'Heart', 'PCA') 
 
-    # adultPackage = data.createData('adult')
-    # heartPackage = data.createData('heart')  
-    # adultPackage.xTrain = dimRedu.getICAData(adultPackage.xTrain, 'Adult')
-    # heartPackage.xTrain = dimRedu.getICAData(heartPackage.xTrain, 'Heart')
-    # runAll(adultPackage, adultClasses, topRange, 'Adult', 'ICA')
-    # runAll(heartPackage, heartClasses, topRange, 'Heart', 'ICA')
+    adultPackage = data.createData('adult')
+    heartPackage = data.createData('heart')  
+    adultPackage.xTrain = dimRedu.getICAData(adultPackage.xTrain, 'Adult')
+    heartPackage.xTrain = dimRedu.getICAData(heartPackage.xTrain, 'Heart')
+    runAll(adultPackage, adultClasses, topRange, 'Adult', 'ICA')
+    runAll(heartPackage, heartClasses, topRange, 'Heart', 'ICA')
  
-    # adultPackage = data.createData('adult')
-    # heartPackage = data.createData('heart')  
-    # adultPackage.xTrain = dimRedu.getRCAData(adultPackage.xTrain, 'Adult')
-    # heartPackage.xTrain = dimRedu.getRCAData(heartPackage.xTrain, 'Heart')
-    # runAll(adultPackage, adultClasses, topRange, 'Adult', 'RCA')
-    # runAll(heartPackage, heartClasses, topRange, 'Heart', 'RCA')
+    adultPackage = data.createData('adult')
+    heartPackage = data.createData('heart')  
+    adultPackage.xTrain = dimRedu.getRCAData(adultPackage.xTrain, 'Adult')
+    heartPackage.xTrain = dimRedu.getRCAData(heartPackage.xTrain, 'Heart')
+    runAll(adultPackage, adultClasses, topRange, 'Adult', 'RCA')
+    runAll(heartPackage, heartClasses, topRange, 'Heart', 'RCA')
     
-    # adultPackage = unprocess(adultPackage)
-    # heartPackage = unprocess(heartPackage)
-    # adultPackage.xTrain = dimRedu.getFAMDData(adultPackage.xTrain, 'Adult')
-    # heartPackage.xTrain = dimRedu.getFAMDData(heartPackage.xTrain, 'Heart')
-    # runAll(adultPackage, adultClasses, topRange, 'Adult', 'FAMD')
-    # runAll(heartPackage, heartClasses, topRange, 'Heart', 'FAMD')
+    adultPackage = unprocess(adultPackage)
+    heartPackage = unprocess(heartPackage)
+    adultPackage.xTrain = dimRedu.getFAMDData(adultPackage.xTrain, 'Adult')
+    heartPackage.xTrain = dimRedu.getFAMDData(heartPackage.xTrain, 'Heart')
+    runAll(adultPackage, adultClasses, topRange, 'Adult', 'FAMD')
+    runAll(heartPackage, heartClasses, topRange, 'Heart', 'FAMD')
 
-    # dimRedu.run(heartPackage, 'Heart')
-    # dimRedu.run(adultPackage, 'Adult')
+    dimRedu.run(heartPackage, 'Heart')
+    dimRedu.run(adultPackage, 'Adult')
  
 
     print('done')
  
 
+def getClusterData(dataType, clusterType):
+    package = data.createData(dataType)
+
+    if (clusterType == 'PCA'):
+        x = dimRedu.getPCAData(package.xTrain, dataType)
+    elif clusterType == 'ICA':
+        x = dimRedu.getICAData(package.xTrain, dataType)
+    elif clusterType == 'RCA':
+        x = dimRedu.getRCAData(package.xTrain, dataType)    
+    else:
+        x = dimRedu.getFAMDData(package.xTrain, dataType)
+
+
+    km = KMeans(n_clusters=4)
+    cluster_labels = km.fit_predict(x) 
+    predictions = km.predict(x)
+    a = 4
+    
 if __name__ == '__main__':
     run()
